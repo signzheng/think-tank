@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>中国版 "Palantir" 市场深度调研与分析</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+    <!-- 
+    Placeholder Comments Required by Prompt
+    -->
+    <!-- Chosen Palette: 'Smart City' Intelligence. Background: Slate-50 (Neutral/Light). Primary: Indigo-600 (Tech/Enterprise). Secondary: Emerald-600 (Growth). Accent: Rose-500 (Risk/Alert). This palette reflects the serious, data-driven nature of B2G/B2B analysis. -->
+    
+    <!-- Application Structure Plan: 
+         1. **Executive Dashboard (Hero)**: High-level summary of the core thesis - "Market Potential vs. Business Model Challenges".
+         2. **Competitive Landscape (Interactive Cards)**: Analysis of key players (MiningLamp, 4Paradigm, etc.) and their specific "Palantir-like" traits.
+         3. **The "Service Trap" Simulator (Interactive Logic)**: A core interactive section demonstrating the fundamental difference between Palantir (Product) and Chinese counterparts (Projects/Services). Users adjust "Standardization Rate" to see impact on Margins.
+         4. **Market Opportunity (Charts)**: Visualization of market size, G-end (Gov) vs. B-end (Biz) breakdown using Chart.js.
+         5. **Risk Radar (Grid/List)**: Categorized risks (Budget, Data Security, Technical) with expand/collapse details.
+         6. **Strategic Conclusion**: Final synthesis.
+         
+         Rationale: The report centers on the difficulty of replicating Palantir's *business model* in China, despite the massive *market demand*. The structure moves from "Who" -> "The Core Problem" -> "The Market Size" -> "Risks", guiding the user to a logical conclusion.
+    -->
+    
+    <!-- Visualization & Content Choices:
+         1. **Margin Simulator (Chart.js + Range Input)**: Goal: Compare/Change. Shows why Chinese firms struggle with profitability compared to Palantir. Interaction: Slider updates chart data dynamically.
+         2. **Market Growth (Chart.js Line/Bar)**: Goal: Inform. Shows the "Digital China" market size.
+         3. **Player Cards (HTML/CSS Grid)**: Goal: Organize. Categorizes companies by their strength (Knowledge Graph vs. AI Platform).
+         4. **Risk Matrix (Styled Grid)**: Goal: Inform/Warn. Heatmap-style presentation of challenges.
+         
+         Confirming NO SVG graphics used. NO Mermaid JS used. All visuals are CSS/HTML or Canvas.
+    -->
+
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans SC', sans-serif;
+            background-color: #f8fafc; /* slate-50 */
+            color: #1e293b; /* slate-800 */
+        }
+
+        /* Chart Container Styling - Mandatory Constraint Compliance */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 700px;
+            height: 350px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        @media (max-width: 768px) {
+            .chart-container {
+                height: 280px;
+            }
+        }
+
+        /* Custom Interactive Elements */
+        .nav-btn {
+            transition: all 0.3s ease;
+        }
+        .nav-btn.active {
+            color: #4f46e5; /* indigo-600 */
+            border-bottom: 2px solid #4f46e5;
+        }
+
+        .player-card {
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+        }
+        .player-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .risk-item {
+            border-left: 4px solid transparent;
+        }
+        .risk-high { border-left-color: #f43f5e; } /* rose-500 */
+        .risk-med { border-left-color: #f59e0b; } /* amber-500 */
+        
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- Navigation -->
+    <nav class="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <div class="bg-indigo-900 text-white font-bold px-2 py-1 rounded mr-3 text-lg">CN-DATA</div>
+                    <span class="font-bold text-slate-800 tracking-tight hidden sm:block">中国版 "Palantir" 深度调研</span>
+                </div>
+                <div class="flex space-x-6 overflow-x-auto no-scrollbar items-center">
+                    <button onclick="switchTab('overview')" id="nav-overview" class="nav-btn active px-1 pt-1 text-sm font-medium text-slate-900 whitespace-nowrap">综述</button>
+                    <button onclick="switchTab('landscape')" id="nav-landscape" class="nav-btn px-1 pt-1 text-sm font-medium text-slate-500 hover:text-slate-700 whitespace-nowrap">竞争格局</button>
+                    <button onclick="switchTab('model')" id="nav-model" class="nav-btn px-1 pt-1 text-sm font-medium text-slate-500 hover:text-slate-700 whitespace-nowrap">商业模式困境</button>
+                    <button onclick="switchTab('market')" id="nav-market" class="nav-btn px-1 pt-1 text-sm font-medium text-slate-500 hover:text-slate-700 whitespace-nowrap">市场与风险</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main id="app-content" class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+        <!-- Content injected via JS -->
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-50 border-t border-slate-200 mt-12 py-8">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <p class="text-sm text-slate-500">基于行业公开研报整理与分析 | Generated by AI Analyst</p>
+            <p class="text-xs text-slate-400 mt-2">数据来源：IDC, Gartner, 行业访谈 (模拟数据)</p>
+        </div>
+    </footer>
+
+    <!-- Logic -->
+    <script>
+        // --- Data Store ---
+        const reportData = {
+            overview: {
+                title: "寻找中国的 Palantir：万亿市场的机遇与迷思",
+                summary: "中国拥有世界上最大的政务与产业数据规模（Data Volume），理论上是孕育下一个 Palantir 的沃土。然而，由于商业模式（项目制 vs 产品制）、付费习惯和预算结构的差异，中国尚未诞生完全对标 Palantir 市值与利润率的企业。当前市场正处于从“集成外包”向“标准化产品”转型的痛苦期。",
+                metrics: [
+                    { label: "潜在市场规模 (TAM)", value: "¥1,500亿+", desc: "政务大数据 + 企业决策智能" },
+                    { label: "平均毛利率 (vs PLTR 80%)", value: "35-45%", desc: "受限于高定制化的人力投入" },
+                    { label: "核心驱动力", value: "信创 + 数字化", desc: "国产替代与数据要素资产化" },
+                    { label: "当前阶段", value: "洗牌期", desc: "独角兽估值回调，寻求盈利" }
+                ]
+            },
+            competitors: [
+                {
+                    name: "明略科技 (MiningLamp)",
+                    tag: "知识图谱",
+                    color: "border-indigo-500",
+                    desc: "最接近 Palantir 技术路线的非上市独角兽。核心产品 SCOPA 对标 Gotham。强项在于公安、金融领域的复杂关系挖掘。",
+                    challenge: "交付过重，盈利周期长。"
+                },
+                {
+                    name: "第四范式 (4Paradigm)",
+                    tag: "AI 决策平台",
+                    color: "border-emerald-500",
+                    desc: "更偏向 AI 平台化（Sage），强调低门槛建模。在金融和零售领域渗透率高。近期港股上市。",
+                    challenge: "如何从单一建模工具转向全链路决策系统。"
+                },
+                {
+                    name: "百分点 (Percent)",
+                    tag: "数据中台",
+                    color: "border-blue-500",
+                    desc: "老牌大数据厂商，拥有完整的 G-end（政府）和 B-end（出海）业务线。强调数据治理与中台构建。",
+                    challenge: "中台概念退潮，需证明业务价值。"
+                },
+                {
+                    name: "海康/大华 (Hikvision/Dahua)",
+                    tag: "感知智能",
+                    color: "border-slate-500",
+                    desc: "从硬件切入软件。拥有海量视频数据，逐渐向多维大数据分析转型。渠道能力极强。",
+                    challenge: "软硬解耦困难，纯软件基因不足。"
+                }
+            ],
+            risks: [
+                { type: "high", title: "G端预算收缩 (Budget Cuts)", desc: "地方财政压力大，非刚需的信息化项目被砍，回款周期（DSO）显著拉长，影响现金流。" },
+                { type: "high", title: "项目制陷阱 (Customization Trap)", desc: "客户要求高度定制，导致代码复用率低，最终沦为高级外包公司，难以通过规模效应盈利。" },
+                { type: "med", title: "数据孤岛 (Data Silos)", desc: "尽管有政策推动，但跨部门数据打通依然面临极高的行政和技术壁垒。" },
+                { type: "med", title: "标准化难度 (Standardization)", desc: "中国各地的业务流程差异巨大，难以像 Palantir 那样用一套 Ontology 适配所有场景。" }
+            ]
+        };
+
+        const state = {
+            activeTab: 'overview',
+            simulationValue: 30 // Standardization rate %
+        };
+
+        // --- Functions ---
+
+        function switchTab(tabId) {
+            state.activeTab = tabId;
+            
+            // Update Nav UI
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active', 'text-slate-900');
+                btn.classList.add('text-slate-500');
+            });
+            const activeBtn = document.getElementById(`nav-${tabId}`);
+            if (activeBtn) {
+                activeBtn.classList.add('active', 'text-slate-900');
+                activeBtn.classList.remove('text-slate-500');
+            }
+
+            // Render Content
+            renderContent(tabId);
+        }
+
+        function renderContent(tabId) {
+            const container = document.getElementById('app-content');
+            container.innerHTML = ''; // Clear
+
+            if (tabId === 'overview') renderOverview(container);
+            else if (tabId === 'landscape') renderLandscape(container);
+            else if (tabId === 'model') renderModel(container);
+            else if (tabId === 'market') renderMarket(container);
+        }
+
+        // --- Renderers ---
+
+        function renderOverview(container) {
+            const data = reportData.overview;
+            
+            const html = `
+                <div class="animate-fade-in space-y-8">
+                    <!-- Hero Section -->
+                    <div class="bg-white rounded-xl p-8 shadow-sm border border-slate-200">
+                        <div class="max-w-3xl">
+                            <h1 class="text-3xl font-bold text-slate-800 mb-4">${data.title}</h1>
+                            <p class="text-lg text-slate-600 leading-relaxed mb-6">
+                                ${data.summary}
+                            </p>
+                            <div class="inline-block bg-indigo-50 text-indigo-700 px-4 py-2 rounded-lg text-sm font-semibold">
+                                核心观点：市场巨大，但“中国版 Palantir”不会是简单的复制，而必须适应本土的“强服务”生态。
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Key Metrics Grid -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        ${data.metrics.map(m => `
+                            <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                                <div class="text-sm text-slate-500 font-medium">${m.label}</div>
+                                <div class="text-2xl font-bold text-slate-800 mt-2">${m.value}</div>
+                                <div class="text-xs text-slate-400 mt-1">${m.desc}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+
+                    <!-- Intro Text -->
+                    <div class="bg-slate-50 p-6 rounded-lg border border-slate-200">
+                        <h3 class="font-bold text-slate-800 mb-2">报告导读</h3>
+                        <p class="text-sm text-slate-600">
+                            本应用将从竞争格局、商业模式差异、市场潜力及风险四个维度展开。请点击上方导航栏深入探索。
+                            特别推荐体验 <strong>"商业模式困境"</strong> 模拟器，理解为何高营收不等于高利润。
+                        </p>
+                    </div>
+                </div>
+            `;
+            container.innerHTML = html;
+        }
+
+        function renderLandscape(container) {
+            const html = `
+                <div class="animate-fade-in">
+                    <div class="mb-6">
+                        <h2 class="text-2xl font-bold text-slate-800">竞争格局：谁在牌桌上？</h2>
+                        <p class="text-slate-600 mt-2">中国市场尚未出现一家独大的局面，而是呈现出“群雄逐鹿”的态势。不同的厂商从不同的技术栈切入。</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        ${reportData.competitors.map(c => `
+                            <div class="player-card bg-white p-6 rounded-xl shadow-sm border-t-4 ${c.color} border-l border-r border-b border-slate-200">
+                                <div class="flex justify-between items-start mb-4">
+                                    <h3 class="text-xl font-bold text-slate-800">${c.name}</h3>
+                                    <span class="bg-slate-100 text-slate-600 text-xs px-2 py-1 rounded-full">${c.tag}</span>
+                                </div>
+                                <p class="text-slate-600 text-sm mb-4 min-h-[40px]">${c.desc}</p>
+                                <div class="bg-rose-50 p-3 rounded text-xs text-rose-700">
+                                    <strong>核心挑战:</strong> ${c.challenge}
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+
+                    <div class="mt-8 bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                        <h3 class="font-bold text-slate-800 mb-4">中美生态位对比</h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm text-left text-slate-600">
+                                <thead class="text-xs text-slate-700 uppercase bg-slate-50">
+                                    <tr>
+                                        <th class="px-6 py-3">维度</th>
+                                        <th class="px-6 py-3">Palantir (US)</th>
+                                        <th class="px-6 py-3">中国厂商</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="bg-white border-b">
+                                        <td class="px-6 py-4 font-medium text-slate-900">核心资产</td>
+                                        <td class="px-6 py-4">标准化软件 (Foundry/Gotham)</td>
+                                        <td class="px-6 py-4">人力 + 解决方案 (Solutions)</td>
+                                    </tr>
+                                    <tr class="bg-white border-b">
+                                        <td class="px-6 py-4 font-medium text-slate-900">部署方式</td>
+                                        <td class="px-6 py-4">Forward Deployed Engineers (驻场是为了卖产品)</td>
+                                        <td class="px-6 py-4">Outsourcing (驻场是为了做项目)</td>
+                                    </tr>
+                                    <tr class="bg-white">
+                                        <td class="px-6 py-4 font-medium text-slate-900">客户粘性</td>
+                                        <td class="px-6 py-4">极高 (操作系统级)</td>
+                                        <td class="px-6 py-4">中等 (往往是一次性买卖)</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            `;
+            container.innerHTML = html;
+        }
+
+        function renderModel(container) {
+            const html = `
+                <div class="animate-fade-in">
+                    <div class="mb-6">
+                        <h2 class="text-2xl font-bold text-slate-800">商业模式困境：服务陷阱</h2>
+                        <p class="text-slate-600 mt-2">中国厂商难以达到 Palantir 估值倍数的核心原因在于：<strong>产品化率低</strong>。大量收入来自于堆人力定制，导致毛利率低下。</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        <!-- Controls -->
+                        <div class="lg:col-span-1 bg-white p-6 rounded-xl shadow-sm border border-slate-200 h-fit">
+                            <h3 class="font-bold text-slate-800 mb-4">模拟器：产品化率的影响</h3>
+                            <p class="text-sm text-slate-500 mb-6">调整下方的“产品标准化程度”滑块，观察对公司利润结构的巨大影响。</p>
+                            
+                            <label for="std-slider" class="block text-sm font-medium text-slate-700 mb-2">产品标准化程度: <span id="std-val" class="text-indigo-600 font-bold">${state.simulationValue}%</span></label>
+                            <input type="range" id="std-slider" min="10" max="90" value="${state.simulationValue}" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600 mb-4">
+                            
+                            <div class="space-y-3 text-sm">
+                                <div class="flex justify-between border-b pb-2">
+                                    <span class="text-slate-500">典型中国项目制公司:</span>
+                                    <span class="font-bold">20-30%</span>
+                                </div>
+                                <div class="flex justify-between border-b pb-2">
+                                    <span class="text-slate-500">Palantir:</span>
+                                    <span class="font-bold">70-80%</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Chart -->
+                        <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                            <h3 class="font-bold text-slate-800 mb-4">毛利率与成本结构分析</h3>
+                            <div class="chart-container">
+                                <canvas id="marginChart"></canvas>
+                            </div>
+                            <div class="mt-4 text-xs text-slate-400 text-center">
+                                *模拟数据。产品标准化程度越高，边际成本越低，毛利越高。
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6 bg-amber-50 border-l-4 border-amber-500 p-4">
+                        <p class="text-sm text-amber-900">
+                            <strong>深度洞察：</strong> Palantir 之所以能成功，是因为它虽然也派人驻场（Forward Deployed），但这些工程师的目标是配置现有产品，而不是从头写代码。中国厂商往往陷入了“为了拿单承诺无限定制”的死循环。
+                        </p>
+                    </div>
+                </div>
+            `;
+            container.innerHTML = html;
+
+            // Init Logic & Chart
+            const slider = document.getElementById('std-slider');
+            const valDisplay = document.getElementById('std-val');
+            
+            slider.addEventListener('input', (e) => {
+                const val = parseInt(e.target.value);
+                state.simulationValue = val;
+                valDisplay.innerText = val + "%";
+                updateMarginChart(val);
+            });
+
+            // Delay for DOM
+            setTimeout(() => initMarginChart(state.simulationValue), 100);
+        }
+
+        function renderMarket(container) {
+            const html = `
+                <div class="animate-fade-in">
+                    <div class="mb-6">
+                        <h2 class="text-2xl font-bold text-slate-800">市场机遇与潜在风险</h2>
+                        <p class="text-slate-600 mt-2">尽管挑战重重，但“数字中国”战略带来的数据治理需求是真实且巨大的。</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                        <!-- Market Chart -->
+                        <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                            <h3 class="font-bold text-slate-800 mb-4">中国大数据与决策智能市场规模 (预测)</h3>
+                            <div class="chart-container">
+                                <canvas id="marketChart"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Risks List -->
+                        <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 overflow-y-auto max-h-[400px]">
+                            <h3 class="font-bold text-slate-800 mb-4">核心风险雷达</h3>
+                            <div class="space-y-4">
+                                ${reportData.risks.map(r => `
+                                    <div class="risk-item ${r.type === 'high' ? 'risk-high' : 'risk-med'} bg-slate-50 p-4 rounded-r-lg">
+                                        <div class="flex items-center justify-between mb-1">
+                                            <h4 class="font-bold text-slate-700">${r.title}</h4>
+                                            <span class="text-xs font-bold uppercase ${r.type === 'high' ? 'text-rose-600' : 'text-amber-600'}">${r.type} Risk</span>
+                                        </div>
+                                        <p class="text-sm text-slate-600">${r.desc}</p>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                        <h3 class="font-bold text-slate-800 mb-3">结论：中国市场还有机会吗？</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <h4 class="font-bold text-indigo-600 mb-2">机会 (Yes)</h4>
+                                <ul class="list-disc list-inside text-sm text-slate-600 space-y-1">
+                                    <li><strong>信创替代：</strong> 政府和国企必须替换国外软件，Palantir 无法进入中国，留下了巨大的真空。</li>
+                                    <li><strong>数据要素：</strong> 国家将数据列为生产要素，数据资产入表需要强有力的治理工具。</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-slate-500 mb-2">挑战 (But...)</h4>
+                                <ul class="list-disc list-inside text-sm text-slate-600 space-y-1">
+                                    <li><strong>去泡沫化：</strong> 资本不再为单纯的“营收增长”买单，企业必须证明盈利能力。</li>
+                                    <li><strong>AI 颠覆：</strong> 大模型（LLM）的出现可能让传统的知识图谱构建成本大幅降低，但也可能颠覆现有的技术壁垒。</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            container.innerHTML = html;
+            setTimeout(initMarketChart, 100);
+        }
+
+        // --- Chart Functions ---
+        let marginChartInstance = null;
+
+        function initMarginChart(standardizationRate) {
+            const ctx = document.getElementById('marginChart').getContext('2d');
+            
+            // Logic: 
+            // Revenue = 100 (Fixed for simpler viz)
+            // COGS (Cost of Goods) drops as Standardization rises.
+            // R&D rises slightly initially then plateaus.
+            // Profit = Revenue - COGS - R&D - Sales
+            
+            const cogs = 100 - (standardizationRate * 0.8); // High std = low COGS
+            const profit = 100 - cogs - 20; // Simplified
+            
+            const data = {
+                labels: ['当前模型预测'],
+                datasets: [
+                    { label: '交付成本 (人力/实施)', data: [cogs], backgroundColor: '#94a3b8' },
+                    { label: '毛利润 (Gross Profit)', data: [profit], backgroundColor: '#4f46e5' }
+                ]
+            };
+
+            marginChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: data,
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { stacked: true, max: 100 },
+                        y: { stacked: true }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': ' + context.raw.toFixed(1) + '%';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateMarginChart(val) {
+            if (!marginChartInstance) return;
+            
+            // Standardization 10% -> COGS ~92% (Low margin)
+            // Standardization 90% -> COGS ~28% (High margin)
+            const cogs = Math.max(20, 100 - (val * 0.9)); 
+            const profit = Math.max(0, 100 - cogs);
+
+            marginChartInstance.data.datasets[0].data = [cogs];
+            marginChartInstance.data.datasets[1].data = [profit];
+            marginChartInstance.update();
+        }
+
+        function initMarketChart() {
+            const ctx = document.getElementById('marketChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['2021', '2022', '2023', '2024(E)', '2025(E)'],
+                    datasets: [
+                        {
+                            label: '政府 (G-end)',
+                            data: [450, 520, 580, 620, 680],
+                            borderColor: '#4f46e5',
+                            backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                            fill: true,
+                            tension: 0.4
+                        },
+                        {
+                            label: '企业 (B-end)',
+                            data: [300, 380, 490, 650, 850], // B-end growing faster
+                            borderColor: '#10b981',
+                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                            fill: true,
+                            tension: 0.4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: { display: true, text: '单位：亿元 RMB' }
+                    },
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
+                    },
+                    scales: {
+                        y: { beginAtZero: false }
+                    }
+                }
+            });
+        }
+
+        // --- Init ---
+        switchTab('overview');
+
+    </script>
+</body>
+</html>

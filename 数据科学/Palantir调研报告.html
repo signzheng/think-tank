@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Palantir Technologies (PLTR) - 深度研报 Dashboard</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Placeholder Comments as required -->
+    <!-- Chosen Palette: Warm Neutral 'Paper' Theme. Backgrounds: Slate-50/White. Accents: Slate-800 (Text), Blue-600 (Primary Action), Amber-500 (Highlights). This creates a clean, 'financial report' aesthetic that is easy to read. -->
+    
+    <!-- Application Structure Plan: 
+         1. **Sidebar Navigation**: Persistent access to key analytical pillars (Overview, Technology Stack, Business Model, Financials).
+         2. **Dynamic Main Content Area**: Changes based on selection without page reload (SPA).
+         3. **Interactive "Ontology" Demo**: A specific section to explain the abstract concept of the "Ontology" using a visual toggle comparison (Rows vs. Objects).
+         4. **Financial Dashboard**: Uses Chart.js to visualize the shift from Gov to Commercial revenue.
+         Rationale: Palantir is complex. A linear report is hard to digest. A dashboard structure allows the user to "drill down" into Tech or Financials based on interest.
+    -->
+    
+    <!-- Visualization & Content Choices:
+         1. **Revenue Mix Chart (Chart.js)**: Stacked Bar. Goal: Compare. Shows the "Crossover" moment where US Commercial growth accelerates.
+         2. **The "Stack" (HTML/CSS Grid)**: Interactive Cards. Goal: Inform. Users click Gotham/Foundry/Apollo/AIP to see technical details. No SVG used.
+         3. **Ontology Visualizer (CSS/JS)**: Interactive Diagram. Goal: Organize/Educate. Shows raw data transforming into connected nodes.
+         4. **Cohort Analysis (Chart.js)**: Line Chart. Goal: Trend. Shows "Land and Expand" mechanics ($ spend over time per customer).
+         5. **SWOT Matrix (CSS Grid)**: 2x2 Grid. Goal: Analysis. Standard business analysis format.
+    -->
+
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* slate-50 */
+            color: #1e293b; /* slate-800 */
+        }
+
+        /* Chart Container Styling - Mandatory Strict Constraints */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px; /* Max width to prevent stretching */
+            height: 350px;    /* Default fixed height */
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        @media (max-width: 768px) {
+            .chart-container {
+                height: 250px; /* Smaller height for mobile */
+            }
+        }
+
+        /* Custom Scrollbar for side nav */
+        .custom-scroll::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scroll::-webkit-scrollbar-track {
+            background: #f1f5f9; 
+        }
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 3px;
+        }
+        .custom-scroll::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; 
+        }
+
+        /* Interactive Card Hover Effects */
+        .interactive-card {
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+        .interactive-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            border-left: 4px solid #2563eb; /* blue-600 */
+        }
+        .interactive-card.active {
+            border-left: 4px solid #2563eb;
+            background-color: #eff6ff; /* blue-50 */
+        }
+
+        /* Node Animation for Ontology Demo */
+        .node {
+            transition: all 0.5s ease-in-out;
+        }
+        .connection-line {
+            height: 2px;
+            background-color: #cbd5e1;
+            transition: width 0.5s ease-in-out;
+        }
+    </style>
+</head>
+<body class="h-screen overflow-hidden flex flex-col md:flex-row">
+
+    <!-- Sidebar Navigation -->
+    <aside class="w-full md:w-64 bg-white border-r border-slate-200 flex flex-col shadow-sm z-10 flex-shrink-0">
+        <div class="p-6 border-b border-slate-100">
+            <h1 class="text-xl font-bold text-slate-900 tracking-tight">PLTR <span class="text-blue-600">Research</span></h1>
+            <p class="text-xs text-slate-500 mt-1">深度商业与技术分析</p>
+        </div>
+        
+        <nav class="flex-1 overflow-y-auto custom-scroll p-4 space-y-1">
+            <button onclick="router('overview')" id="nav-overview" class="w-full text-left px-4 py-3 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-blue-600 transition-colors flex items-center group bg-slate-100 text-blue-700">
+                <span class="mr-3 text-lg opacity-70">◉</span> 核心综述 (Overview)
+            </button>
+            <button onclick="router('tech')" id="nav-tech" class="w-full text-left px-4 py-3 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-blue-600 transition-colors flex items-center group">
+                <span class="mr-3 text-lg opacity-70">◈</span> 技术栈逻辑 (The Stack)
+            </button>
+            <button onclick="router('ontology')" id="nav-ontology" class="w-full text-left px-4 py-3 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-blue-600 transition-colors flex items-center group">
+                <span class="mr-3 text-lg opacity-70">☍</span> 核心壁垒 (Ontology)
+            </button>
+            <button onclick="router('business')" id="nav-business" class="w-full text-left px-4 py-3 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-blue-600 transition-colors flex items-center group">
+                <span class="mr-3 text-lg opacity-70">📈</span> 商业模型 (Business)
+            </button>
+            <button onclick="router('financials')" id="nav-financials" class="w-full text-left px-4 py-3 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-blue-600 transition-colors flex items-center group">
+                <span class="mr-3 text-lg opacity-70">📊</span> 财务分析 (Financials)
+            </button>
+        </nav>
+
+        <div class="p-4 border-t border-slate-100">
+            <div class="bg-slate-50 p-3 rounded text-xs text-slate-500 leading-relaxed">
+                <span class="font-semibold block mb-1 text-slate-700">Status:</span>
+                GAAP Profitable<br>
+                S&P 500 Included<br>
+                AIP Accelerating
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 overflow-y-auto bg-slate-50 p-4 md:p-8 relative" id="main-content">
+        <!-- Content injected via JS -->
+    </main>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // --- State Management ---
+        const state = {
+            currentTab: 'overview',
+            chartInstances: {},
+            interactiveData: {
+                ontologyMode: 'rows' // 'rows' or 'objects'
+            }
+        };
+
+        // --- Data Store (Simulating Source Report Content) ---
+        const reportData = {
+            overview: {
+                title: "操作系统级的企业重构",
+                intro: "Palantir 不仅仅是一家数据分析公司，它提供的是构建现代企业数字孪生（Digital Twin）的操作系统。其核心逻辑在于将离散的数据转化为具体的业务对象（Ontology），从而让决策者而非工程师直接操作数据。近期 AIP（人工智能平台）的发布，通过 LLM 极大降低了操作门槛，加速了商业部门（US Commercial）的增长。",
+                metrics: [
+                    { label: "US Commercial Growth", value: "+70%", sub: "Year over Year (Recent Qtr)" },
+                    { label: "Total Customers", value: "550+", sub: "Rapidly Expanding" },
+                    { label: "Rule of 40", value: "Exceeded", sub: "Growth + Profitability" },
+                    { label: "Cash Position", value: "$3.8B", sub: "Zero Debt" }
+                ]
+            },
+            tech: [
+                {
+                    id: 'gotham',
+                    name: "Gotham",
+                    focus: "政府 / 军工 (Government)",
+                    icon: "🛡️",
+                    desc: "专为反恐、情报和军事行动设计。核心在于“大海捞针”。",
+                    details: "基于图谱（Graph-based）架构。擅长处理非结构化情报，连接看似无关的实体（人、地点、事件）。主要用于目标定位、任务规划和情报融合。"
+                },
+                {
+                    id: 'foundry',
+                    name: "Foundry",
+                    focus: "商业 / 民用 (Commercial)",
+                    icon: "🏭",
+                    desc: "企业的中央操作系统。核心在于“数据整合与决策”。",
+                    details: "将ERP、CRM、IoT等孤立数据源整合为“本体（Ontology）”。允许非技术人员通过低代码工具构建应用。用于供应链优化、质量管理、反洗钱等。"
+                },
+                {
+                    id: 'apollo',
+                    name: "Apollo",
+                    focus: "基础设施 (Infrastructure)",
+                    icon: "🚀",
+                    desc: "持续交付与部署平台。核心在于“随处运行”。",
+                    details: "让软件可以部署在公有云、私有云，甚至是断网的悍马车、潜艇或卫星上。实现了SaaS模式在极端边缘环境的交付。"
+                },
+                {
+                    id: 'aip',
+                    name: "AIP",
+                    focus: "生成式 AI (GenAI)",
+                    icon: "🧠",
+                    desc: "大模型与本体的结合。核心在于“行动（Action）”。",
+                    details: "不同于仅能聊天的ChatGPT，AIP允许LLM调用Foundry中的工具和数据，直接执行业务操作（如“下单补货”、“重新排产”），并保留完整审计日志。"
+                }
+            ],
+            financials: {
+                revenueHistory: {
+                    labels: ['2020', '2021', '2022', '2023', '2024(E)'],
+                    gov: [610, 897, 1076, 1270, 1450],
+                    comm: [482, 645, 834, 1100, 1600] // Illustrative acceleration
+                }
+            }
+        };
+
+        // --- Core Router ---
+        function router(tabId) {
+            state.currentTab = tabId;
+            
+            // Update Sidebar UI
+            document.querySelectorAll('nav button').forEach(btn => {
+                btn.classList.remove('bg-slate-100', 'text-blue-700');
+                btn.classList.add('text-slate-600');
+            });
+            const activeBtn = document.getElementById(`nav-${tabId}`);
+            if(activeBtn) {
+                activeBtn.classList.add('bg-slate-100', 'text-blue-700');
+                activeBtn.classList.remove('text-slate-600');
+            }
+
+            // Render Content
+            const main = document.getElementById('main-content');
+            main.innerHTML = ''; // Clear current
+            
+            switch(tabId) {
+                case 'overview': renderOverview(main); break;
+                case 'tech': renderTech(main); break;
+                case 'ontology': renderOntology(main); break;
+                case 'business': renderBusiness(main); break;
+                case 'financials': renderFinancials(main); break;
+            }
+        }
+
+        // --- Render Functions ---
+
+        function renderOverview(container) {
+            const data = reportData.overview;
+            
+            const html = `
+                <div class="max-w-5xl mx-auto space-y-8 animate-fade-in">
+                    <!-- Hero Section -->
+                    <div class="bg-white p-8 rounded-xl shadow-sm border border-slate-200">
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <h2 class="text-3xl font-bold text-slate-800 mb-4">${data.title}</h2>
+                                <p class="text-slate-600 leading-relaxed text-lg max-w-3xl">
+                                    ${data.intro}
+                                </p>
+                            </div>
+                            <div class="hidden md:block text-6xl opacity-10">🦅</div>
+                        </div>
+                    </div>
+
+                    <!-- Metrics Grid -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        ${data.metrics.map(m => `
+                            <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 hover:border-blue-300 transition-colors">
+                                <div class="text-sm text-slate-500 font-medium uppercase tracking-wider">${m.label}</div>
+                                <div class="text-3xl font-bold text-slate-900 mt-2">${m.value}</div>
+                                <div class="text-xs text-blue-600 mt-1 font-medium">${m.sub}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+
+                    <!-- Thesis Points -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                            <h3 class="text-lg font-bold text-slate-800 mb-3 border-b border-slate-100 pb-2">为何不同？(Differentiation)</h3>
+                            <ul class="space-y-3">
+                                <li class="flex items-start"><span class="text-blue-500 mr-2">✓</span> <span class="text-slate-600 text-sm"><strong>全栈集成：</strong> 不只是数据库，而是从数据摄入到应用决策的完整闭环。</span></li>
+                                <li class="flex items-start"><span class="text-blue-500 mr-2">✓</span> <span class="text-slate-600 text-sm"><strong>双向绑定：</strong> 决策结果（Write-back）会写回系统，形成反馈循环。</span></li>
+                                <li class="flex items-start"><span class="text-blue-500 mr-2">✓</span> <span class="text-slate-600 text-sm"><strong>AIP 训练营：</strong> 极其激进的 GTM 策略，从数月的销售周期缩短至数天的 Bootcamp。</span></li>
+                            </ul>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                            <h3 class="text-lg font-bold text-slate-800 mb-3 border-b border-slate-100 pb-2">关键风险 (Risks)</h3>
+                            <ul class="space-y-3">
+                                <li class="flex items-start"><span class="text-amber-500 mr-2">⚠</span> <span class="text-slate-600 text-sm"><strong>估值溢价：</strong> 市场已定价了极高的 AI 预期。</span></li>
+                                <li class="flex items-start"><span class="text-amber-500 mr-2">⚠</span> <span class="text-slate-600 text-sm"><strong>政府合同波动：</strong> 尽管商业部门增长快，但政府大单仍存在不确定性。</span></li>
+                                <li class="flex items-start"><span class="text-amber-500 mr-2">⚠</span> <span class="text-slate-600 text-sm"><strong>人才竞争：</strong> AI 工程师的争夺战日益激烈。</span></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            `;
+            container.innerHTML = html;
+        }
+
+        function renderTech(container) {
+            const html = `
+                <div class="max-w-5xl mx-auto animate-fade-in">
+                    <div class="mb-6">
+                        <h2 class="text-2xl font-bold text-slate-800">四大技术支柱 (Technology Stack)</h2>
+                        <p class="text-slate-600 mt-2">Palantir 的产品不是孤立的软件，而是一个分层的生态系统。点击下方卡片查看详情。</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <!-- Left: Interactive List -->
+                        <div class="lg:col-span-1 space-y-3">
+                            ${reportData.tech.map((item, index) => `
+                                <div onclick="updateTechDetail(${index})" id="tech-card-${index}" class="interactive-card bg-white p-4 rounded-lg shadow-sm cursor-pointer border border-slate-200 ${index === 0 ? 'active' : ''}">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center">
+                                            <span class="text-2xl mr-3">${item.icon}</span>
+                                            <div>
+                                                <div class="font-bold text-slate-800">${item.name}</div>
+                                                <div class="text-xs text-slate-500">${item.focus}</div>
+                                            </div>
+                                        </div>
+                                        <div class="text-slate-300">→</div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+
+                        <!-- Right: Detail View -->
+                        <div class="lg:col-span-2 bg-white rounded-xl shadow-sm border border-slate-200 p-8 flex flex-col justify-center min-h-[300px]" id="tech-detail-panel">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+                </div>
+            `;
+            container.innerHTML = html;
+            updateTechDetail(0); // Init
+        }
+
+        function updateTechDetail(index) {
+            // Update UI State
+            document.querySelectorAll('.interactive-card').forEach(c => c.classList.remove('active'));
+            document.getElementById(`tech-card-${index}`).classList.add('active');
+
+            const item = reportData.tech[index];
+            const panel = document.getElementById('tech-detail-panel');
+            
+            panel.innerHTML = `
+                <div class="animate-fade-in">
+                    <div class="flex items-center mb-4">
+                        <span class="text-4xl mr-4">${item.icon}</span>
+                        <h3 class="text-3xl font-bold text-slate-800">${item.name}</h3>
+                    </div>
+                    <div class="inline-block px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-semibold mb-6">
+                        Target: ${item.focus}
+                    </div>
+                    
+                    <h4 class="font-bold text-slate-700 text-lg mb-2">核心逻辑</h4>
+                    <p class="text-slate-600 mb-6 leading-relaxed">${item.desc}</p>
+                    
+                    <h4 class="font-bold text-slate-700 text-lg mb-2">技术深挖</h4>
+                    <p class="text-slate-600 leading-relaxed bg-slate-50 p-4 rounded-lg border border-slate-100">
+                        ${item.details}
+                    </p>
+                </div>
+            `;
+        }
+
+        function renderOntology(container) {
+            const html = `
+                <div class="max-w-5xl mx-auto animate-fade-in">
+                    <div class="mb-6">
+                        <h2 class="text-2xl font-bold text-slate-800">核心壁垒：本体论 (The Ontology)</h2>
+                        <p class="text-slate-600 mt-2 mb-4">传统IT系统看到的是“行和列”，Palantir 看到的是“对象和关系”。这决定了AI能否理解业务。</p>
+                        
+                        <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6">
+                            <p class="text-sm text-blue-800">
+                                <strong>交互演示：</strong> 点击下方按钮切换视图，查看 Palantir 如何将原始数据转化为业务决策模型。
+                            </p>
+                        </div>
+
+                        <div class="flex justify-center mb-8">
+                            <div class="bg-slate-200 p-1 rounded-lg inline-flex">
+                                <button onclick="toggleOntology('rows')" id="btn-rows" class="px-6 py-2 rounded-md text-sm font-medium transition-all bg-white shadow-sm text-slate-800">原始数据 (SQL View)</button>
+                                <button onclick="toggleOntology('objects')" id="btn-objects" class="px-6 py-2 rounded-md text-sm font-medium transition-all text-slate-600 hover:text-slate-800">本体视图 (Ontology View)</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Interactive Canvas Area -->
+                    <div id="ontology-canvas" class="bg-white rounded-xl shadow-inner border border-slate-300 p-8 h-[400px] relative overflow-hidden flex items-center justify-center">
+                        <!-- Content controlled by JS toggleOntology -->
+                    </div>
+
+                    <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="font-bold text-slate-800 mb-2">为什么要这么做？</h4>
+                            <p class="text-sm text-slate-600">只有将数据映射为真实世界的“对象”（如工厂、飞机、客户），AI (LLM) 才能理解业务逻辑。例如，ChatGPT 不懂“Table_A Col_3 > 50”，但它懂“如果工厂库存不足，则订货”。</p>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-slate-800 mb-2">技术护城河</h4>
+                            <p class="text-sm text-slate-600">构建 Ontology 需要极高的时间成本和业务理解。一旦构建完成，所有应用都在此之上运行，替换成本极高（High Switching Cost）。</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            container.innerHTML = html;
+            toggleOntology('rows'); // Init
+        }
+
+        function toggleOntology(mode) {
+            state.interactiveData.ontologyMode = mode;
+            
+            // Update Buttons
+            const btnRows = document.getElementById('btn-rows');
+            const btnObj = document.getElementById('btn-objects');
+            if(mode === 'rows') {
+                btnRows.classList.add('bg-white', 'shadow-sm', 'text-slate-800');
+                btnRows.classList.remove('text-slate-600');
+                btnObj.classList.remove('bg-white', 'shadow-sm', 'text-slate-800');
+                btnObj.classList.add('text-slate-600');
+            } else {
+                btnObj.classList.add('bg-white', 'shadow-sm', 'text-slate-800');
+                btnObj.classList.remove('text-slate-600');
+                btnRows.classList.remove('bg-white', 'shadow-sm', 'text-slate-800');
+                btnRows.classList.add('text-slate-600');
+            }
+
+            const canvas = document.getElementById('ontology-canvas');
+            
+            if (mode === 'rows') {
+                canvas.innerHTML = `
+                    <div class="w-full max-w-2xl font-mono text-xs text-slate-500 space-y-2 animate-fade-in">
+                        <div class="p-2 border border-slate-200 bg-slate-50 rounded">SELECT * FROM aircraft_sensors WHERE temp > 400;</div>
+                        <div class="grid grid-cols-4 gap-1 text-center font-bold text-slate-700 border-b border-slate-300 pb-1">
+                            <div>ID</div><div>TYPE</div><div>VAL</div><div>LOC</div>
+                        </div>
+                        <div class="grid grid-cols-4 gap-1 text-center p-1 hover:bg-slate-100"><div>001</div><div>A320</div><div>405</div><div>LAX</div></div>
+                        <div class="grid grid-cols-4 gap-1 text-center p-1 hover:bg-slate-100"><div>002</div><div>B737</div><div>398</div><div>JFK</div></div>
+                        <div class="grid grid-cols-4 gap-1 text-center p-1 bg-red-50 text-red-600 border border-red-200 rounded"><div>003</div><div>A320</div><div>450</div><div>ORD</div></div>
+                        <div class="grid grid-cols-4 gap-1 text-center p-1 hover:bg-slate-100"><div>004</div><div>B737</div><div>401</div><div>SFO</div></div>
+                        
+                        <div class="mt-4 p-2 border border-slate-200 bg-slate-50 rounded">SELECT * FROM maintenance_logs WHERE id = '003';</div>
+                        <div class="text-center text-slate-400 mt-4 italic">数据是孤立的，缺乏上下文联系。</div>
+                    </div>
+                `;
+            } else {
+                canvas.innerHTML = `
+                    <div class="relative w-full h-full flex items-center justify-center animate-fade-in">
+                        <!-- Connecting Lines (CSS only visuals) -->
+                        <div class="absolute w-[60%] h-[2px] bg-blue-200 top-1/2 left-[20%]"></div>
+                        <div class="absolute w-[2px] h-[30%] bg-blue-200 top-[35%] left-1/2"></div>
+                        
+                        <!-- Central Object -->
+                        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white border-2 border-blue-500 rounded-lg p-4 shadow-lg text-center z-10 w-48">
+                            <div class="text-2xl mb-1">✈️</div>
+                            <div class="font-bold text-slate-800">Object: Aircraft 003</div>
+                            <div class="text-xs text-red-500 font-bold mt-1">Status: Overheat</div>
+                            <div class="mt-2 text-xs bg-slate-100 p-1 rounded">Action: Grounded</div>
+                        </div>
+
+                        <!-- Linked Object 1 -->
+                        <div class="absolute top-[20%] left-[10%] bg-white border border-slate-300 rounded-lg p-3 shadow-md text-center z-10 w-40">
+                            <div class="text-xl mb-1">🔧</div>
+                            <div class="font-bold text-slate-700 text-sm">Object: Part</div>
+                            <div class="text-xs text-slate-500">Engine Fan Blade</div>
+                        </div>
+
+                        <!-- Linked Object 2 -->
+                        <div class="absolute top-[20%] right-[10%] bg-white border border-slate-300 rounded-lg p-3 shadow-md text-center z-10 w-40">
+                            <div class="text-xl mb-1">📅</div>
+                            <div class="font-bold text-slate-700 text-sm">Object: Flight Plan</div>
+                            <div class="text-xs text-slate-500">Route: ORD -> LHR</div>
+                            <div class="text-xs text-red-500 font-bold">Alert: Cancelled</div>
+                        </div>
+                        
+                        <!-- Connected Concept -->
+                        <div class="absolute bottom-[10%] bg-blue-600 text-white rounded-full px-4 py-2 shadow-lg z-10 text-sm font-bold">
+                            Decision: Re-route Passenger
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function renderBusiness(container) {
+            const html = `
+                <div class="max-w-5xl mx-auto animate-fade-in">
+                    <div class="mb-6">
+                        <h2 class="text-2xl font-bold text-slate-800">商业模式：Land & Expand</h2>
+                        <p class="text-slate-600 mt-2">Palantir 的收入增长依赖于在现有客户中的不断渗透（Expand）。典型的客户生命周期分为三个阶段：Acquire (获取), Expand (扩展), Scale (规模化)。</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <!-- Strategy Text -->
+                        <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                            <h3 class="font-bold text-slate-800 mb-4 text-lg">增长飞轮</h3>
+                            <div class="space-y-6">
+                                <div class="flex">
+                                    <div class="flex-shrink-0 w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center font-bold text-slate-500 mr-4">1</div>
+                                    <div>
+                                        <h4 class="font-bold text-slate-800">Acquire (试点)</h4>
+                                        <p class="text-sm text-slate-600 mt-1">通常亏损或低毛利。通过 "Bootcamps" 快速展示 AIP 价值，将 6 个月的销售周期缩短为 5 天。</p>
+                                    </div>
+                                </div>
+                                <div class="flex">
+                                    <div class="flex-shrink-0 w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center font-bold text-blue-600 mr-4">2</div>
+                                    <div>
+                                        <h4 class="font-bold text-slate-800">Expand (扩展)</h4>
+                                        <p class="text-sm text-slate-600 mt-1">客户发现软件解决了核心痛点，开始在更多部门部署。毛利开始转正。</p>
+                                    </div>
+                                </div>
+                                <div class="flex">
+                                    <div class="flex-shrink-0 w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center font-bold text-white mr-4">3</div>
+                                    <div>
+                                        <h4 class="font-bold text-slate-800">Scale (规模化)</h4>
+                                        <p class="text-sm text-slate-600 mt-1">全企业部署。客户支付高额订阅费，利润率极高。客户流失率极低。</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Cohort Visualization (Conceptual Chart) -->
+                        <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                            <h3 class="font-bold text-slate-800 mb-4 text-lg">单客价值增长 (Illustrative)</h3>
+                            <div class="chart-container">
+                                <canvas id="cohortChart"></canvas>
+                            </div>
+                            <p class="text-xs text-center text-slate-400 mt-2">*基于历史 Cohort 数据的趋势模拟</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            container.innerHTML = html;
+
+            // Render Chart
+            setTimeout(() => {
+                const ctx = document.getElementById('cohortChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Year 1', 'Year 2', 'Year 3', 'Year 4', 'Year 5'],
+                        datasets: [{
+                            label: 'Top 20 Customers Avg Revenue ($M)',
+                            data: [5, 12, 25, 38, 55],
+                            borderColor: '#2563eb',
+                            backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                            fill: true,
+                            tension: 0.4
+                        },
+                        {
+                            label: 'Avg Customer Revenue',
+                            data: [1, 1.5, 2.2, 3.5, 5.0],
+                            borderColor: '#94a3b8',
+                            borderDash: [5, 5],
+                            fill: false,
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'bottom' }
+                        },
+                        scales: {
+                            y: { display: true, beginAtZero: true }
+                        }
+                    }
+                });
+            }, 100);
+        }
+
+        function renderFinancials(container) {
+            const html = `
+                <div class="max-w-5xl mx-auto animate-fade-in">
+                    <div class="mb-6 flex justify-between items-end">
+                        <div>
+                            <h2 class="text-2xl font-bold text-slate-800">财务分析：增长与盈利</h2>
+                            <p class="text-slate-600 mt-2">从"不惜代价增长"到"GAAP 盈利"的转型。关注 US Commercial 的加速。</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 mb-8">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="font-bold text-slate-800 text-lg">收入构成趋势 (Revenue Mix)</h3>
+                            <div class="flex space-x-2 text-sm">
+                                <span class="flex items-center"><span class="w-3 h-3 bg-slate-800 rounded-full mr-2"></span> Government</span>
+                                <span class="flex items-center"><span class="w-3 h-3 bg-blue-500 rounded-full mr-2"></span> Commercial</span>
+                            </div>
+                        </div>
+                        <div class="chart-container h-80">
+                            <canvas id="revChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                            <div class="text-sm text-slate-500 font-medium">Gross Margin (Adj.)</div>
+                            <div class="text-2xl font-bold text-slate-800 mt-1">80-82%</div>
+                            <div class="text-xs text-green-600 mt-1">Software-like Margins</div>
+                        </div>
+                        <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                            <div class="text-sm text-slate-500 font-medium">Net Income</div>
+                            <div class="text-2xl font-bold text-slate-800 mt-1">Profitable</div>
+                            <div class="text-xs text-green-600 mt-1">4+ Consecutive Qtrs</div>
+                        </div>
+                        <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                            <div class="text-sm text-slate-500 font-medium">US Commercial Growth</div>
+                            <div class="text-2xl font-bold text-blue-600 mt-1">Accelerating</div>
+                            <div class="text-xs text-slate-500 mt-1">Driver: AIP Adoption</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            container.innerHTML = html;
+
+            setTimeout(() => {
+                const ctx = document.getElementById('revChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: reportData.financials.revenueHistory.labels,
+                        datasets: [
+                            {
+                                label: 'Government',
+                                data: reportData.financials.revenueHistory.gov,
+                                backgroundColor: '#1e293b', // slate-800
+                                stack: 'Stack 0'
+                            },
+                            {
+                                label: 'Commercial',
+                                data: reportData.financials.revenueHistory.comm,
+                                backgroundColor: '#3b82f6', // blue-500
+                                stack: 'Stack 0'
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false }, // Custom legend used in HTML
+                            tooltip: {
+                                mode: 'index',
+                                intersect: false,
+                            }
+                        },
+                        scales: {
+                            x: {
+                                grid: { display: false }
+                            },
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Revenue ($ Millions)'
+                                }
+                            }
+                        }
+                    }
+                });
+            }, 100);
+        }
+
+        // --- Init ---
+        // Initialize with overview
+        router('overview');
+
+        // Simple Fade In Animation for inserted content
+        const style = document.createElement('style');
+        style.innerHTML = `
+            @keyframes fadeIn {
+                from { opacity: 0; transform: translateY(10px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+            .animate-fade-in {
+                animation: fadeIn 0.4s ease-out forwards;
+            }
+        `;
+        document.head.appendChild(style);
+
+    </script>
+</body>
+</html>
