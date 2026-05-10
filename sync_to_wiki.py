@@ -2,7 +2,11 @@
 """
 Incremental upload: only upload files changed since last git commit.
 Usage: python sync_to_wiki.py [wiki_root_token] [space_id]
-
+ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDIjb2qNitz/yNrozeoEFdPA02U6J7hmYFfqCtIsLZlofla/S+aMRjgEOae1JhKbEAXgrBhk92twbi83nJgfoXuhQ5rYXU044depVl0Kelm5IwJJgjgfh
+  90R2XMfvESrMvANgJl+IwA2Ya14BBTOA0/clGvmlHhxRyXJH8DuVl+DtDHTE1Y3i+kRuDtvA9+g6FspEsJIYE2FHYBHu0k+csNkejo42OMtDaK8OV6Tf+eC9JBWTcMPl8BgE//vCLPpL9kvsrLr4wv1wzS
+  8KEngiQZEIaAY2duqIhlEQ7wUFiFCr9dKplg3Y5tnUT1kgpCUbMJ3cm5bgJC3QrDfhT/HHWHK4NnrVMIrU2k90psPQOBOitYoqJz2czJbSm0DEmzSPie6DumD9lOiL1gPhwHSCk83X4oonqwi4D84B6khH
+  7uO6cEg4u5HxfrY1Gi3pjozB95qhGY4QsyVrnAF2LsbCrkRBrPc0678CSYPDIzYyu8J0M8867M7051F8WQ7weOTSDSHJfPbGTiXqtHxj44ciCSenPyxGaGZGpyqUaLat5IJlCoOgn91thYVKeu0lBz04CZ
+  DzndCmt+2Vogs+v1oxvOevoKdaxOL/93fc7spmJ2U2Ekc/za9W5zZ2g8Vg0YJYnvh0NJYOszu3pPDYccY0UHLap1M6NtNuHSGb5GqngGGQ== your_email@example.com
 Works for both 思想者 and 数据面试 directories.
 First run uploads all; subsequent runs only upload changed/new files.
 """
